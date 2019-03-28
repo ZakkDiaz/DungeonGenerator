@@ -17,7 +17,7 @@ namespace DungeonRenderer
         {
             InitializeComponent();
             panel1.Paint += Panel1_Paint;
-            generator = new CellGenerator(10);
+            generator = new CellGenerator();
         }
 
         private void Panel1_Paint(object sender, PaintEventArgs e)
@@ -31,15 +31,13 @@ namespace DungeonRenderer
 
         private Bitmap GenerateDungeon()
         {
-            var xVal = textBox1.Text;
-            var yVal = textBox2.Text;
+            var seed = textBox1.Text;
+            var size = textBox2.Text;
             int x = 10;
-            int y = 10;
-            Int32.TryParse(xVal, out x);
-            Int32.TryParse(yVal, out y);
+            Int32.TryParse(size, out x);
             x = x == 0 ? 10 : x;
-            y = y == 0 ? 10 : y;
-            generator.GenerateDungeon(x, y);
+            generator = new CellGenerator();
+            generator.GenerateDungeon(seed, x, trackBar1.Value);
             return generator.Draw(panel1.Width, panel1.Height);
         }
 
@@ -49,90 +47,87 @@ namespace DungeonRenderer
         }
     }
 
-    public class DungeonGenerator : IDungeonGenerator
-    {
-        private List<ITile> tiles;
-        private Random r;
+    //public class DungeonGenerator : IDungeonGenerator
+    //{
+    //    private List<ITile> tiles;
+    //    private Random r;
 
-        public DungeonGenerator()
-        {
-            tiles = new List<ITile>();
-            r = new Random();
-        }
+    //    public DungeonGenerator()
+    //    {
+    //        tiles = new List<ITile>();
+    //        r = new Random();
+    //    }
 
-        public DungeonGenerator(int seed)
-        {
-            tiles = new List<ITile>();
-            r = new Random(seed);
-        }
+    //    public DungeonGenerator(int seed)
+    //    {
+    //        tiles = new List<ITile>();
+    //        r = new Random(seed);
+    //    }
 
-        public Bitmap Draw(int width, int height)
-        {
-            var min = Math.Min(width, height);
-            Bitmap bmp = new Bitmap(min, min);
+    //    public Bitmap Draw(int width, int height)
+    //    {
+    //        var min = Math.Min(width, height);
+    //        Bitmap bmp = new Bitmap(min, min);
 
-            DrawDungeon(ref bmp);
+    //        DrawDungeon(ref bmp);
 
-            return bmp;
-        }
+    //        return bmp;
+    //    }
 
-        public void DrawDungeon(ref Bitmap bmp)
-        {
-            var maxX = tiles.Max(m => m.GetLocation().X);
-            var maxY = tiles.Max(m => m.GetLocation().Y);
-            var width = bmp.Width;
-            var height = bmp.Height;
-            var tileWidth = tiles.Count(c => c.GetLocation().X == 0);
-            var tileHeight =tiles.Count(c => c.GetLocation().Y == 0);
-            tileWidth = width / maxX;
-            tileHeight = height / maxY;
-            using (var g = Graphics.FromImage(bmp))
-            {
-                foreach (var tile in tiles)
-                {
-                    Point p = tile.GetLocation();
-                    Color c = tile.GetColor();
-                    var xStep = p.X / (float)maxX;
-                    var yStep = p.Y / (float)maxY;
-                    xStep *= width;
-                    yStep *= height;
-                    g.FillRectangle(new SolidBrush(c), xStep, yStep, tileWidth, tileHeight);
-                }
-            }
-        }
+    //    public void DrawDungeon(ref Bitmap bmp)
+    //    {
+    //        var maxX = tiles.Max(m => m.GetLocation().X);
+    //        var maxY = tiles.Max(m => m.GetLocation().Y);
+    //        var width = bmp.Width;
+    //        var height = bmp.Height;
+    //        var tileWidth = tiles.Count(c => c.GetLocation().X == 0);
+    //        var tileHeight =tiles.Count(c => c.GetLocation().Y == 0);
+    //        tileWidth = width / maxX;
+    //        tileHeight = height / maxY;
+    //        using (var g = Graphics.FromImage(bmp))
+    //        {
+    //            foreach (var tile in tiles)
+    //            {
+    //                Point p = tile.GetLocation();
+    //                Color c = tile.GetColor();
+    //                var xStep = p.X / (float)maxX;
+    //                var yStep = p.Y / (float)maxY;
+    //                xStep *= width;
+    //                yStep *= height;
+    //                g.FillRectangle(new SolidBrush(c), xStep, yStep, tileWidth, tileHeight);
+    //            }
+    //        }
+    //    }
 
-        public void GenerateDungeon(int rows, int columns)
-        {
-            tiles.Clear();
-            for (var i = 0; i < rows; i++)
-            {
-                for (var ii = 0; ii < columns; ii++)
-                {
-                    tiles.Add(GetTile(i, ii));
-                }
-            }
-        }
+    //    public void GenerateDungeon(int rows, int columns)
+    //    {
+    //        tiles.Clear();
+    //        for (var i = 0; i < rows; i++)
+    //        {
+    //            for (var ii = 0; ii < columns; ii++)
+    //            {
+    //                tiles.Add(GetTile(i, ii));
+    //            }
+    //        }
+    //    }
 
-        public ITile GetTile(int i, int ii)
-        {
-            if (i < ii)
-                return new Tile(i, ii, Color.Green);
-            else if(i > ii + 5)
-                return new Tile(i, ii, Color.DarkGreen);
-            else
-                return new Tile(i, ii, Color.Blue);
-        }
-    }
+    //    public ITile GetTile(int i, int ii)
+    //    {
+    //        if (i < ii)
+    //            return new Tile(i, ii, Color.Green);
+    //        else if(i > ii + 5)
+    //            return new Tile(i, ii, Color.DarkGreen);
+    //        else
+    //            return new Tile(i, ii, Color.Blue);
+    //    }
+    //}
 
     public class CellGenerator : IDungeonGenerator
     {
         List<Cell> cells = new List<Cell>();
-
-        public CellGenerator(int squareLength)
+        private string _seed = "empty";
+        public CellGenerator()
         {
-            this.Generate(squareLength);
-            var removedList = this.Trim();
-            cells = cells.Except(removedList).ToList();
         }
 
         private List<Cell> Trim()
@@ -160,7 +155,10 @@ namespace DungeonRenderer
             }
 
             //Sort them randomly
-            Random r = new Random();
+
+            int sd = -1;
+            Int32.TryParse(_seed, out sd);
+            Random r = new Random(sd);
             cells = cells.OrderBy(o => r.Next()).ToList();
 
             //Assign coordinates
@@ -290,9 +288,16 @@ namespace DungeonRenderer
             //    cell, ref renderCells);
         }
 
-        public void GenerateDungeon(int rows, int columns)
+        public void GenerateDungeon(string seed, int squareLength, int pruneLength)
         {
-            //already done in constructor
+            _seed = seed;
+            this.Generate(squareLength);
+
+            for (var i = 0; i < pruneLength; i++)
+            {
+                var removedList = this.Trim();
+                cells = cells.Except(removedList).ToList();
+            }
         }
 
         public ITile GetTile(int i, int ii)
@@ -334,7 +339,7 @@ namespace DungeonRenderer
     public interface IDungeonGenerator
     {
         Bitmap Draw(int width, int height);
-        void GenerateDungeon(int rows, int columns);
+        void GenerateDungeon(string seed, int squareLength, int pruneLength);
         ITile GetTile(int i, int ii);
     }
 
