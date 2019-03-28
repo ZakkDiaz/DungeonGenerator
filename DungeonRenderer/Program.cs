@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-
-namespace DungeonRenderer.Models
+namespace DungeonRenderer
 {
     internal static class Program
     {

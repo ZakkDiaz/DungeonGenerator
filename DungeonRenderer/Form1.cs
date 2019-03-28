@@ -6,19 +6,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DungeonRenderer.Models;
-
 namespace DungeonRenderer
 {
     public partial class Form1 : Form
     {
-        private IDungeonGenerator generator;
+        private IDungeonGenerator _generator;
         public Form1()
         {
             InitializeComponent();
             panel1.Paint += Panel1_Paint;
-            generator = new CellGenerator();
+            _generator = new CellGenerator();
         }
-
         private void Panel1_Paint(object sender, PaintEventArgs e)
         {
             using (var g = e.Graphics)
@@ -27,7 +25,6 @@ namespace DungeonRenderer
                 g.DrawImage(GenerateDungeon(), new PointF(0,0));
             }
         }
-
         private Bitmap GenerateDungeon()
         {
             var seed = textBox1.Text;
@@ -35,13 +32,18 @@ namespace DungeonRenderer
             int x = 10;
             Int32.TryParse(size, out x);
             x = x == 0 ? 10 : x;
-            generator = new CellGenerator();
-            generator.GenerateDungeon(seed, x, trackBar1.Value);
-            return generator.Draw(panel1.Width, panel1.Height);
+            _generator.GenerateDungeon(seed, x, trackBar1.Value);
+            return _generator.Draw(panel1.Width, panel1.Height);
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
+            _generator.Clear();
+            panel1.Invalidate();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            _generator = new CellGenerator();
             panel1.Invalidate();
         }
     }

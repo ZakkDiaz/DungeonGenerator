@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-
 namespace DungeonRenderer.Models
 {
     public interface ITile
@@ -8,4 +7,3 @@ namespace DungeonRenderer.Models
         Color GetColor();
     }
 }
-
