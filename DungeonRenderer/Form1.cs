@@ -25,7 +25,7 @@ namespace DungeonRenderer
                 g.DrawImage(GenerateDungeon(), new PointF(0,0));
             }
         }
-        private Bitmap GenerateDungeon()
+        private void GenerateDungeon()
         {
             var seed = textBox1.Text;
             var size = textBox2.Text;
@@ -33,7 +33,7 @@ namespace DungeonRenderer
             Int32.TryParse(size, out x);
             x = x == 0 ? 10 : x;
             _generator.GenerateDungeon(seed, x, trackBar1.Value);
-            return _generator.Draw(panel1.Width, panel1.Height);
+            //return _generator.Draw(panel1.Width, panel1.Height);
         }
         private void button1_Click(object sender, EventArgs e)
         {

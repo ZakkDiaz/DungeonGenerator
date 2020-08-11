@@ -23,7 +23,7 @@ namespace DungeonRenderer.Models
         public bool South() => _south != null;
         
         private Tuple<int, int> _coordinate { get; set; }
-        public Tuple<int, int> Coordinates() => _coordinate ?? new Tuple<int, int>(0, 0);
+        public Tuple<int, int> Coordinates() => _coordinate != null ? _coordinate : new Tuple<int, int>(0, 0);
         public Cell(int Id)
         {
             _id = Id;
@@ -81,7 +81,7 @@ namespace DungeonRenderer.Models
         }
         private bool IsNear(Cell c)
         {
-            if (c == null)
+            if (c == null || c._coordinate == null)
                 return false;
             
             return
@@ -92,6 +92,8 @@ namespace DungeonRenderer.Models
         }
         public Point GetLocation()
         {
+            if (_coordinate == null)
+                return new Point(-1000, 1000);
             return new Point(_coordinate.Item1, _coordinate.Item2);
         }
         public Color GetColor()
@@ -99,7 +101,7 @@ namespace DungeonRenderer.Models
             var red = (_id + _value) / 5;
             var green = 127;
             var blue = 127;
-            return Color.FromArgb(Clamp(red), Clamp(green), Clamp(blue));
+            return Color.FromArgb(25, Clamp(red), Clamp(green), Clamp(blue));
         }
         private int Clamp(int val)
         {
